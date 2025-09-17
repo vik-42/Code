@@ -30,3 +30,8 @@ plt.bar(range(X_train.shape[1]), importances[indices], color='blue',align='cente
 plt.xticks(range(X_train.shape[1]),feat_labels[indices],rotation=90)
 plt.tight_layout()
 plt.show()
+
+#based on the obtained results, we can use the transform method of the RandomForestClassifier to transform the dataset based on a threshold
+
+X_selected = forest.transform(X_train,threshold=0.15)
+print(X_selected.shape)
