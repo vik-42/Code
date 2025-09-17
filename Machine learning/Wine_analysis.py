@@ -2,6 +2,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.feature_selection import SequentialFeatureSelector
 import numpy as np
 import pandas as pd
@@ -29,20 +30,35 @@ print('test accuracy without sbs: %f'%lr.score(X_test_std,y_test))
 
 
 #To better improve the model's capability to predict, a SBS algorithm could be implemented, to automatically reduce the number of didmensions to a more suitable one, in order to reduce noise.
+#In the following, a logistic regression and a k-neighboor classifier are compared:
 
-acc = []
+kn = KNeighborsClassifier(n_neighbors=2)
+
+acc = {}
+acc[lr] = []
+acc[kn] = []
 k_val = []
 for k in range(1, len(X[1,:])):
     k_val.append(k)
-    sfs = SequentialFeatureSelector(lr, n_features_to_select=k, direction ='backward')
-    sfs.fit(X_train_std,y_train) #It is better to use scaled data
-    X_train_scaled_sfs_bwd = sfs.transform(X_train_std)
-    X_test_scaled_sfs_bwd = sfs.transform(X_test_std)
-    lr.fit(X_train_scaled_sfs_bwd, y_train)
-    acc.append(lr.score(X_test_scaled_sfs_bwd,y_test))
+    sfs_lr = SequentialFeatureSelector(lr, n_features_to_select=k, direction ='backward')
+    sfs_kn = SequentialFeatureSelector(kn, n_features_to_select=k, direction ='backward')
+
+    sfs_lr.fit(X_train_std,y_train) #It is better to use scaled data
+    sfs_kn.fit(X_train_std,y_train)
+
+    X_train_scaled_sfs_bwd_lr = sfs_lr.transform(X_train_std)
+    X_test_scaled_sfs_bwd_lr = sfs_lr.transform(X_test_std)
+    X_train_scaled_sfs_bwd_kn = sfs_kn.transform(X_train_std)
+    X_test_scaled_sfs_bwd_kn = sfs_kn.transform(X_test_std)
+
+    lr.fit(X_train_scaled_sfs_bwd_lr, y_train)
+    kn.fit(X_train_scaled_sfs_bwd_lr, y_train)
+    acc[lr].append(lr.score(X_test_scaled_sfs_bwd_lr,y_test))
+    acc[kn].append(kn.score(X_test_scaled_sfs_bwd_kn,y_test))
     
 #this code allows to evaluate the linear model's accuracy using more attributes
-plt.plot(k_val,acc, marker = 'o')
+plt.plot(k_val, acc[lr], marker = 'o')
+plt.plot(k_val, acc[kn], marker='x')
 plt.grid()
 plt.show()
 
