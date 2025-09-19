@@ -35,3 +35,4 @@ plt.show()
 
 X_selected = forest.transform(X_train,threshold=0.15)
 print(X_selected.shape)
+
