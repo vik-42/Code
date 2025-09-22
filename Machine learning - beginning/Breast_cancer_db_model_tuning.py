@@ -118,3 +118,33 @@ pipe_svc.fit(X_train, y_train)
 y_pred = pipe_svc.predict(X_test)
 confmat = confusion_matrix(y_true=y_test,y_pred=y_pred)
 print(confmat)
+
+#The obtained result is the following:
+
+#  0  1 (predicted)
+#0 71 1
+#1 2  40
+#(real)
+#1 = malign tumor
+#0 = bening tumor
+#
+#1 false negative FN
+#2 false positives FP
+
+TP = confmat[1,1]
+TN = confmat[0,0]
+FP = confmat[1,0]
+FN = confmat [0,1]
+
+Err = (FP+FN)/(FP+FN+TP+TN)
+Acc = 1-Err
+
+print('The error is %s'%Err)
+
+Pre = TP/(TP+FP) #Precision 
+Rec = TP/(FN+TP) #Recall: True positive Rate => True_positives/Total_predicted_positives
+
+#F1-Score
+F1 = 2*Pre*Rec/(Pre+Rec) #F1 score
+
+#The same metrics can be implemented through sklearn.metrics.precision_score(), .recall_score(), .f1_score()
