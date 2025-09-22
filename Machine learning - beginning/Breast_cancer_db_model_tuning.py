@@ -13,6 +13,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 
 df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data', header=None)
 
@@ -102,3 +103,18 @@ print('The best parameters are %s'% gs.best_params_)
 clf = gs. best_estimator_
 clf.fit(X_train, y_train)
 print('Test accurac of the best model: %.3f'%clf.score(X_train, y_train))
+
+#As accuracy is not a reliable metrics, Precision, recall and F1-Score are implemented in the following:
+
+#The confusion matrix is used to better understand the given results
+#   0 1 (predicted)
+#0
+#1
+#(real)
+#1 = malign tumor
+#0 = bening tumor
+
+pipe_svc.fit(X_train, y_train)
+y_pred = pipe_svc.predict(X_test)
+confmat = confusion_matrix(y_true=y_test,y_pred=y_pred)
+print(confmat)
