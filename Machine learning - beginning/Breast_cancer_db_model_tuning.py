@@ -7,6 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import learning_curve
+from sklearn.model_selection import validation_curve
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
@@ -41,14 +44,15 @@ print('CV accuracy scores: %s' % scores_more_efficient)
 pipe_lr = Pipeline([('scl', StandardScaler()), ('clf', LogisticRegression(penalty='l2', random_state=0))])
 train_sizes, train_scores, test_scores = learning_curve(estimator=pipe_lr, X=X_train, y=y_train, train_sizes=np.linspace(0.1,1,10), cv=10, n_jobs = -1) #cv is the number of splits to be performed
 
+
 train_mean = np.mean(train_scores, axis = 1)
 train_std = np.std(train_scores, axis = 1)
 test_mean = np.mean(test_scores, axis = 1)
 test_std = np.std(test_scores, axis = 1)
 
-plt.plot(train_sizes,train_mean, color='blue', marker = 'o',linestyle ='--', label = 'training accuracy')
+plt.plot(train_sizes,train_mean, color='blue', marker = 'o', label = 'training accuracy')
 plt.plot(train_sizes, test_mean, color ='green', marker = 'x', linestyle='--', label = 'training variance')
-plt.fill_between(train_sizes, train_mean+train_std,train_mean-train_std, label = 'validation accuracy', alpha = 0.15)
+plt.fill_between(train_sizes, train_mean+train_std,train_mean-train_std, label = 'training variance', alpha = 0.15)
 plt.fill_between(train_sizes, test_mean+test_std, test_mean-test_std, color='green', alpha = 0.15, label = 'validation variance')
 plt.grid()
 plt.xlabel('# of training samples')
@@ -58,3 +62,25 @@ plt.legend(loc ='lower right')
 plt.show()
 
 #The graph shows a slight difference between the training and the validation training curve, this indicates slight overfitting on training data, as they don't converge completely
+
+#We can now add validation curves to solve overfitting and underfitting problems by evaluating the C parameter in the logistic regression model:
+param_range = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+
+train_scores, test_scores = validation_curve(estimator=pipe_lr, X=X_train, y = y_train, param_name='clf__C', param_range = param_range, cv = 10)
+train_mean = np.mean(train_scores, axis = 1)
+train_std = np.std(train_scores, axis = 1)
+test_mean = np.mean(test_scores, axis = 1)
+test_std = np.std(test_scores, axis = 1)
+
+plt.plot(param_range,train_mean, color='blue', marker = 'o', label = 'training accuracy')
+plt.plot(param_range, test_mean, color ='green', marker = 'x', linestyle='--', label = 'training variance')
+plt.fill_between(param_range, train_mean+train_std,train_mean-train_std, label = 'training variance', alpha = 0.15)
+plt.fill_between(param_range, test_mean+test_std, test_mean-test_std, color='green', alpha = 0.15, label = 'validation variance')
+plt.xscale('log')
+plt.grid()
+plt.xlabel('# of training samples')
+plt.ylabel('Accuracy')
+plt.ylim([0.8,1.0])
+plt.legend(loc ='lower right')
+plt.show()
+
